@@ -15,29 +15,29 @@ var Polynomial = /** @class */ (function () {
     function Polynomial(C, arrayLength) {
         if (arrayLength === void 0) { arrayLength = 0; }
         this.ctor = C;
-        this.coefficients = Array(arrayLength);
+        this.coef = Array(arrayLength);
         for (var i = 0; i < arrayLength; ++i)
-            this.coefficients[i] = new C();
+            this.coef[i] = new C();
     }
     Polynomial.prototype.length = function () {
-        return this.coefficients.length;
+        return this.coef.length;
     };
     Polynomial.prototype.copyFromArray = function (arry) {
-        this.coefficients = __spreadArrays(arry);
+        this.coef = __spreadArrays(arry);
         for (var i = 0; i < this.length(); ++i)
-            if (typeof this.coefficients[i] === 'undefined')
-                this.coefficients[i] = new this.ctor();
+            if (typeof this.coef[i] === 'undefined')
+                this.coef[i] = new this.ctor();
     };
     Polynomial.prototype.copyFrom = function (o) {
         for (var i = 0; i < o.length(); ++i)
-            this.coefficients[i] = o.coefficients[i];
+            this.coef[i] = o.coef[i];
     };
     Polynomial.prototype.addBy = function (o) {
         var long = Math.max(this.length(), o.length());
         var res = new Polynomial(this.ctor, long);
         res.copyFrom(this);
         for (var i = 0; i < o.length(); ++i)
-            res.coefficients[i] = res.coefficients[i].addBy(o.coefficients[i]);
+            res.coef[i] = res.coef[i].addBy(o.coef[i]);
         return res;
     };
     Polynomial.prototype.subtractBy = function (o) {
@@ -45,18 +45,69 @@ var Polynomial = /** @class */ (function () {
     };
     Polynomial.prototype.negate = function () {
         var res = new Polynomial(this.ctor);
-        res.coefficients = this.coefficients.map(function (each) { return each.negate(); });
+        res.coef = this.coef.map(function (each) { return each.negate(); });
         return res;
     };
     Polynomial.prototype.multiplyBy = function (o) {
         var res = new Polynomial(this.ctor, this.length() + o.length() - 1);
         for (var i = 0; i < this.length(); ++i)
             for (var j = 0; j < o.length(); ++j)
-                res.coefficients[i + j] = res.coefficients[i + j].addBy(this.coefficients[i].multiplyBy(o.coefficients[j]));
+                res.coef[i + j] = res.coef[i + j].addBy(this.coef[i].multiplyBy(o.coef[j]));
         return res;
     };
+    Polynomial.prototype.dividedBy = function (o) {
+        var _this = this;
+        var shiftRight = function (p, n) {
+            if (n <= 0)
+                return p;
+            var deg = p.degree();
+            var res = new Polynomial(_this.ctor, _this.length());
+            res.copyFrom(p);
+            for (var i = deg; i > -1; --i) {
+                res.coef[i + n] = res.coef[i];
+                res.coef[i] = new _this.ctor();
+            }
+            return p;
+        };
+        var mapMult = function (p, n) {
+            p.coef = p.coef.map(function (e) { return e.multiplyBy(n); });
+        };
+        var ndeg = this.degree();
+        var ddeg = o.degree();
+        if (ndeg < ddeg) {
+            return {
+                q: new Polynomial(this.ctor, 0),
+                r: this
+            };
+        }
+        var nden = new Polynomial(this.ctor, this.length());
+        var r = new Polynomial(this.ctor, this.length());
+        var q = new Polynomial(this.ctor, this.length());
+        nden.copyFrom(o);
+        r.copyFrom(this);
+        while (ndeg >= ddeg) {
+            var d2 = shiftRight(nden, ndeg - ddeg);
+            q.coef[ndeg - ddeg] = r.coef[ndeg].dividedBy(d2.coef[ndeg]);
+            mapMult(d2, q.coef[ndeg - ddeg]);
+            r = r.subtractBy(d2);
+            ndeg = r.degree();
+        }
+        return {
+            q: q, r: r
+        };
+    };
+    Polynomial.prototype.degree = function () {
+        for (var i = this.length() - 1; i > -1; --i)
+            if (!this.coef[i].isNull())
+                return i;
+        return -1;
+    };
     Polynomial.prototype.toString = function () {
-        return this.coefficients.map(function (each, i) { return each.toString() + 'x^' + i; }).join(' + ');
+        if (this.coef.every(function (each) { return each.isNull(); }))
+            return '0';
+        return this.coef.map(function (each, i) { return each.toString() + 'x^' + i; })
+            .join(' + ')
+            .replace('x^0', '').replace('x^1', 'x');
     };
     return Polynomial;
 }());
@@ -131,6 +182,6 @@ v.copyFromArray([new rationals_1.Rational(3, 4), new rationals_1.Rational(-2, 7)
 var u = new polynomials_1.Polynomial(rationals_1.Rational, 10);
 u.copyFromArray([new rationals_1.Rational(), new rationals_1.Rational(), new rationals_1.Rational(4, 21), new rationals_1.Rational(), new rationals_1.Rational(-3, 1)]);
 document.body.innerHTML =
-    "u:   " + v.toString() + "<br/>\nv:    " + u.toString() + "<br/>\nu+v:  " + v.addBy(u).toString() + "<br/>\nu-v:  " + v.subtractBy(u).toString() + "<br/>\nu*v:  " + v.multiplyBy(u).toString() + "\n";
+    ("u:   " + v.toString() + "<br/>\nv:    " + u.toString() + "<br/>\nu+v:  " + v.addBy(u).toString() + "<br/>\nu-v:  " + v.subtractBy(u).toString() + "<br/>\nu*v:  " + v.multiplyBy(u).toString() + "<br/>\nu/v:  " + v.dividedBy(u).q.toString() + "<br/>\nu%v:  " + v.dividedBy(u).r.toString() + "\n").replace(/\^(\d+)/g, '<sup>$1</sup>');
 
-},{"./polynomials":1,"./rationals":2}]},{},[2,3]);
+},{"./polynomials":1,"./rationals":2}]},{},[3]);
