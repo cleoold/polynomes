@@ -13,35 +13,31 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var Polynomial = /** @class */ (function () {
     function Polynomial(C, arrayLength) {
-        var _this = this;
         if (arrayLength === void 0) { arrayLength = 0; }
         this.ctor = C;
         this.coefficients = Array(arrayLength);
-        this.coefficients.forEach(function (_, i) {
-            _this.coefficients[i] = new C();
-        });
+        for (var i = 0; i < arrayLength; ++i)
+            this.coefficients[i] = new C();
     }
+    Polynomial.prototype.length = function () {
+        return this.coefficients.length;
+    };
     Polynomial.prototype.copyFromArray = function (arry) {
-        var _this = this;
         this.coefficients = __spreadArrays(arry);
-        this.coefficients.forEach(function (_, i) {
-            if (typeof _this.coefficients[i] === 'undefined')
-                _this.coefficients[i] = new _this.ctor();
-        });
+        for (var i = 0; i < this.length(); ++i)
+            if (typeof this.coefficients[i] === 'undefined')
+                this.coefficients[i] = new this.ctor();
     };
     Polynomial.prototype.copyFrom = function (o) {
-        var _this = this;
-        o.coefficients.forEach(function (_, i) {
-            _this.coefficients[i] = o.coefficients[i];
-        });
+        for (var i = 0; i < o.length(); ++i)
+            this.coefficients[i] = o.coefficients[i];
     };
     Polynomial.prototype.addBy = function (o) {
-        var long = Math.max(this.coefficients.length, o.coefficients.length);
+        var long = Math.max(this.length(), o.length());
         var res = new Polynomial(this.ctor, long);
         res.copyFrom(this);
-        o.coefficients.forEach(function (_, i) {
+        for (var i = 0; i < o.length(); ++i)
             res.coefficients[i] = res.coefficients[i].addBy(o.coefficients[i]);
-        });
         return res;
     };
     Polynomial.prototype.subtractBy = function (o) {
@@ -50,6 +46,13 @@ var Polynomial = /** @class */ (function () {
     Polynomial.prototype.negate = function () {
         var res = new Polynomial(this.ctor);
         res.coefficients = this.coefficients.map(function (each) { return each.negate(); });
+        return res;
+    };
+    Polynomial.prototype.multiplyBy = function (o) {
+        var res = new Polynomial(this.ctor, this.length() + o.length() - 1);
+        for (var i = 0; i < this.length(); ++i)
+            for (var j = 0; j < o.length(); ++j)
+                res.coefficients[i + j] = res.coefficients[i + j].addBy(this.coefficients[i].multiplyBy(o.coefficients[j]));
         return res;
     };
     Polynomial.prototype.toString = function () {
@@ -128,6 +131,6 @@ v.copyFromArray([new rationals_1.Rational(3, 4), new rationals_1.Rational(-2, 7)
 var u = new polynomials_1.Polynomial(rationals_1.Rational, 10);
 u.copyFromArray([new rationals_1.Rational(), new rationals_1.Rational(), new rationals_1.Rational(4, 21), new rationals_1.Rational(), new rationals_1.Rational(-3, 1)]);
 document.body.innerHTML =
-    "u:   " + v.toString() + "<br/>\nv:    " + u.toString() + "<br/>\nu+v:  " + v.addBy(u).toString() + "<br/>\nu-v:  " + v.subtractBy(u).toString() + "<br/>\n";
+    "u:   " + v.toString() + "<br/>\nv:    " + u.toString() + "<br/>\nu+v:  " + v.addBy(u).toString() + "<br/>\nu-v:  " + v.subtractBy(u).toString() + "<br/>\nu*v:  " + v.multiplyBy(u).toString() + "\n";
 
 },{"./polynomials":1,"./rationals":2}]},{},[2,3]);

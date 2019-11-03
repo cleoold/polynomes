@@ -11,4 +11,5 @@ document.body.innerHTML =
 v:    ${u.toString()}<br/>
 u+v:  ${v.addBy(u).toString()}<br/>
 u-v:  ${v.subtractBy(u).toString()}<br/>
+u*v:  ${v.multiplyBy(u).toString()}
 `
