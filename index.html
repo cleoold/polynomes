@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <!--polynomials demo! ()cleoold-->
 
@@ -11,11 +12,57 @@
     <meta name="renderer" content="webkit">
     <link rel="icon" href="./index.png" sizes="32x32">
     <title>Math Polynômes</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
+
 <body>
-    
+    <div class="app">
+        <div class="data-container">
+                <select name id="set-field">
+                        <option value="rational">Rational Q</option>
+                        <option value="real">Real ℝ</option>
+                    </select>
+            <div class="data-head">
+                <h3>Entrez votre fonction polynomiale...</h3>
+                <p>
+                Vous pouvez calculer addition, multiplication et plus pour
+                un polynôme. Veuillez inspecter la case ci-dessous pour savoir
+                comment saisir vos données.</p>
+                <p>
+                    Format: [nombre] [degré] ... [nombre] [1] [nombre] [0]
+                </p>
+            </div>
+            <div class="inputs">
+                <div class="box-label">
+                    <span>Polynôme P(x)</span>
+                </div>
+                <input type="text" id="poly-1" />
+                <div class="box-label">
+                    <span>Polynôme Q(x)</span>
+                </div>
+                <input type="text" id="poly-2" />
+            </div>
+            <div class="comp-results">
+                <div class="box-label"><span>Votre P(x)</span></div>
+                <div id="display-poly1"></div>
+                <div class="box-label"><span>Votre Q(x)</span></div>
+                <div id="display-poly2"></div>
+                <div class="box-label"><span>Sum (P+Q)(x)</span></div>
+                <div id="display-polyadd"></div>
+                <div class="box-label"><span>Soustraction (P-Q)(x)</span></div>
+                <div id="display-polysub"></div>
+                <div class="box-label"><span>Multiplication PQ(x)</span></div>
+                <div id="display-polymult"></div>
+                <div class="box-label"><span>Quotient (P/Q)(x)</span></div>
+                <div id="display-polydivq"></div>
+                <div class="box-label"><span>Reste (P%Q)(x)</span></div>
+                <div id="display-polydivr"></div>
+                <div class="box-label"><span>HCF(P,Q)(x)</span></div>
+                <div id="display-polygcd"></div>
+            </div>
+        </div>
+    </div>
 </body>
 
-<script type="text/javascript" src="./js/bundle.js"></script>
 
 </html>
