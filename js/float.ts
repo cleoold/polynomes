@@ -3,6 +3,12 @@
  */
 
 
+export function readFloat(input: string): FloatNumber {
+    const float: number = parseFloat(input);
+    return new FloatNumber(isNaN(float) ? 0 : float);
+}
+
+
 function eq(a: number, b: number) {
     return Math.abs(a - b) < 1e-4;
 }

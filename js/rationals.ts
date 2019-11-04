@@ -6,6 +6,17 @@
 type integer = number;
 
 
+export function readRational(input: string): Rational {
+    const [num, den] = input.split('/').map(parseInt);
+    if (typeof num !== 'undefined' && !isNaN(num)) {
+        if (typeof num !== 'undefined' && !isNaN(den)) 
+            return new Rational(num, den);
+        return new Rational(num, 1);
+    }
+    return new Rational();
+}
+
+
 function hcf(a: integer, b: integer): integer {
     if (b === 0)
         return a;
@@ -34,12 +45,6 @@ export class Rational {
         this.numerator = numerator;
         this.denominator = denominator;
         this.simplify();
-    }
-
-    toString(): string {
-        if (this.numerator === 0) return '(0)';
-        else if (this.denominator === 1) return '(' + this.numerator + ')';
-        return '(' + this.numerator + '/' + this.denominator + ')';
     }
 
     addBy(o: Rational): Rational {
@@ -79,5 +84,11 @@ export class Rational {
 
     isNull(): boolean {
         return this.numerator === 0;
+    }
+
+    toString(): string {
+        if (this.numerator === 0) return '(0)';
+        else if (this.denominator === 1) return '(' + this.numerator + ')';
+        return '(' + this.numerator + '/' + this.denominator + ')';
     }
 }

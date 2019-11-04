@@ -23,6 +23,12 @@ export class Polynomial<NumType> {
             this.coef[i] = new C();
     }
 
+    makeCopy(): Polynomial<NumType> {
+        let res = new Polynomial(this.ctor);
+        res.copyFrom(this);
+        return res;
+    }
+
     deleteTrailingZero(): void {
         for (let i = this.length()-1; i > -1; --i) {
             if (!(this.coef[i] as any).isNull())
@@ -48,9 +54,7 @@ export class Polynomial<NumType> {
     }
 
     addBy(o: Polynomial<NumType>): Polynomial<NumType> {
-        const long = Math.max(this.length(), o.length());
-        let res: any = new Polynomial(this.ctor, long);
-        res.copyFrom(this);
+        let res: any = this.makeCopy();
         for (let i = 0; i < o.length(); ++i)
             res.coef[i] = res.coef[i].addBy(o.coef[i]);
         res.deleteTrailingZero();
@@ -83,10 +87,8 @@ export class Polynomial<NumType> {
         const shiftRight = (p: Polynomial<NumType>, n: number): Polynomial<NumType> => {
             if (n <= 0) return p;
             const deg = p.degree();
-            let res = new Polynomial<NumType>(this.ctor, p.length());
-            res.copyFrom(p);
-            for (let i = deg; i > -1; --i)
-            {
+            let res: Polynomial<NumType> = p.makeCopy();
+            for (let i = deg; i > -1; --i) {
                 res.coef[i+n] = res.coef[i];
                 res.coef[i] = new this.ctor();
             }
@@ -100,19 +102,15 @@ export class Polynomial<NumType> {
         let ndeg = this.degree();
         const ddeg = o.degree();
         if (ndeg < ddeg) {
-            let copy = new Polynomial<NumType>(this.ctor, this.length());
-            copy.copyFrom(this);
             return {
                 q: new Polynomial<NumType>(this.ctor, 0),
-                r : copy
+                r : this.makeCopy()
             };
         }
 
-        let nden = new Polynomial<NumType>(this.ctor, this.length());
-        let r = new Polynomial<NumType>(this.ctor, this.length());
+        let nden = o.makeCopy();
+        let r = this.makeCopy();
         let q = new Polynomial<NumType>(this.ctor, this.length());
-        nden.copyFrom(o);
-        r.copyFrom(this);
 
         while (ndeg >= ddeg) {
             let d2 = shiftRight(nden, ndeg-ddeg);
