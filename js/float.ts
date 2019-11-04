@@ -3,6 +3,7 @@
  */
 
 
+
 export function readFloat(input: string): FloatNumber {
     const float: number = parseFloat(input);
     return new FloatNumber(isNaN(float) ? 0 : float);
@@ -41,6 +42,7 @@ export class FloatNumber {
     }
 
     dividedBy(o: FloatNumber): FloatNumber {
+        if (eq(o.float, 0)) throw new EvalError('Error: Division par zéro!');
         return new FloatNumber(
             this.float / o.float
         );

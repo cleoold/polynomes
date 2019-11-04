@@ -1,2 +1,3 @@
 # polynomes
-sur le point de démarrer...
+
+Just for fun!

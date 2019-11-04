@@ -54,7 +54,8 @@ export class Polynomial<NumType> {
     }
 
     addBy(o: Polynomial<NumType>): Polynomial<NumType> {
-        let res: any = this.makeCopy();
+        let res: any = new Polynomial(this.ctor, Math.max(this.length(), o.length()));
+        res.copyFrom(this);
         for (let i = 0; i < o.length(); ++i)
             res.coef[i] = res.coef[i].addBy(o.coef[i]);
         res.deleteTrailingZero();
@@ -66,13 +67,13 @@ export class Polynomial<NumType> {
     }
 
     negate(): Polynomial<NumType> {
-        let res = new Polynomial<NumType>(this.ctor);
+        let res = new Polynomial(this.ctor);
         res.coef = this.coef.map(each => (each as any).negate());
         return res;
     }
 
     multiplyBy(o: Polynomial<NumType>): Polynomial<NumType> {
-        let res = new Polynomial<NumType>(this.ctor, this.length() + o.length() - 1);
+        let res = new Polynomial(this.ctor, this.length() + o.length() - 1);
         for (let i = 0; i < this.length(); ++i)
             for (let j = 0; j < o.length(); ++j)
                 res.coef[i+j] = (res.coef[i+j] as any).addBy(
@@ -103,14 +104,15 @@ export class Polynomial<NumType> {
         const ddeg = o.degree();
         if (ndeg < ddeg) {
             return {
-                q: new Polynomial<NumType>(this.ctor, 0),
+                q: new Polynomial(this.ctor, 0),
                 r : this.makeCopy()
             };
         }
 
-        let nden = o.makeCopy();
+        let nden = new Polynomial(this.ctor, this.length());
+        nden.copyFrom(o);
         let r = this.makeCopy();
-        let q = new Polynomial<NumType>(this.ctor, this.length());
+        let q = new Polynomial(this.ctor, this.length());
 
         while (ndeg >= ddeg) {
             let d2 = shiftRight(nden, ndeg-ddeg);
@@ -153,6 +155,7 @@ export class Polynomial<NumType> {
             .reverse()
             .map(p => p[0].toString() + 'x^' + p[1])
             .join(' + ')
-            .replace('x^0', '').replace('x^1', 'x');
+            .replace('x^0', '').replace('x^1 ', 'x ')
+            .replace(/x\^(\d+)/g, 'x<sup>$1</sup>');
     }
 }

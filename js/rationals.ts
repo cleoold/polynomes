@@ -7,7 +7,7 @@ type integer = number;
 
 
 export function readRational(input: string): Rational {
-    const [num, den] = input.split('/').map(parseInt);
+    const [num, den] = input.split('/').map(e => parseInt(e));
     if (typeof num !== 'undefined' && !isNaN(num)) {
         if (typeof num !== 'undefined' && !isNaN(den)) 
             return new Rational(num, den);
@@ -40,7 +40,7 @@ export class Rational {
 
     constructor(numerator: integer = 0, denominator: integer = 1) {
         if (denominator === 0) {
-            throw Error("Division par zéro!");
+            throw new EvalError('Error: Division par zéro!');
         }
         this.numerator = numerator;
         this.denominator = denominator;

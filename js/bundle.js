@@ -4,6 +4,11 @@
  * float numbers
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+function readFloat(input) {
+    var float = parseFloat(input);
+    return new FloatNumber(isNaN(float) ? 0 : float);
+}
+exports.readFloat = readFloat;
 function eq(a, b) {
     return Math.abs(a - b) < 1e-4;
 }
@@ -22,6 +27,8 @@ var FloatNumber = /** @class */ (function () {
         return new FloatNumber(this.float * o.float);
     };
     FloatNumber.prototype.dividedBy = function (o) {
+        if (eq(o.float, 0))
+            throw new EvalError('Error: Division par zéro!');
         return new FloatNumber(this.float / o.float);
     };
     FloatNumber.prototype.negate = function () {
@@ -38,6 +45,110 @@ var FloatNumber = /** @class */ (function () {
 exports.FloatNumber = FloatNumber;
 
 },{}],2:[function(require,module,exports){
+"use strict";
+/**
+ * index page
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+var rationals_1 = require("./rationals");
+var float_1 = require("./float");
+var polynomials_1 = require("./polynomials");
+var $ = document.querySelector.bind(document);
+var $inputP = $('#poly-1');
+var $inputQ = $('#poly-2');
+var $P = $('#display-poly1 span');
+var $Q = $('#display-poly2 span');
+var $PaddQ = $('#display-polyadd span');
+var $PsubQ = $('#display-polysub span');
+var $PmulQ = $('#display-polymult span');
+var $PdivQ = $('#display-polydivq span');
+var $PmodQ = $('#display-polydivr span');
+var $hcf = $('#display-polygcd span');
+var $$ins = [$inputP, $inputQ];
+var $$outs = [$P, $Q, $PaddQ, $PsubQ, $PmulQ, $PdivQ, $PmodQ, $hcf];
+var $mode = $('#set-field');
+function readPoly(read, C, strVal) {
+    var strings = strVal.split(' ');
+    var arr = [];
+    for (var i = 0; i < strings.length; i += 2)
+        arr[strings[i + 1]] = read(strings[i]);
+    var res = new polynomials_1.Polynomial(C);
+    res.copyFromArray(arr);
+    return res;
+}
+function readPolyFromChart(read, cls) {
+    $$outs.forEach(function (elem) { return elem.innerHTML = ''; });
+    var Px, Qx;
+    try {
+        Px = readPoly(read, cls, $inputP.value);
+    }
+    catch (err) {
+        if (err instanceof EvalError)
+            $P.innerHTML = err.message;
+        else
+            throw err;
+    }
+    try {
+        Qx = readPoly(read, cls, $inputQ.value);
+    }
+    catch (err) {
+        if (err instanceof EvalError)
+            $Q.innerHTML = err.message;
+        else
+            throw err;
+    }
+    $P.innerHTML = Px.toString();
+    $Q.innerHTML = Qx.toString();
+    if ($inputP.value === '' || $inputQ.value === '')
+        return;
+    var add = Px.addBy(Qx);
+    $PaddQ.innerHTML = add.toString();
+    var sub = Px.subtractBy(Qx);
+    $PsubQ.innerHTML = sub.toString();
+    var mul = Px.multiplyBy(Qx);
+    $PmulQ.innerHTML = mul.toString();
+    try {
+        var _a = Px.dividedBy(Qx), divq = _a.q, divr = _a.r;
+        $PdivQ.innerHTML = divq.toString();
+        $PmodQ.innerHTML = divr.toString();
+        var hcf = Px.hcf(Qx);
+        $hcf.innerHTML = hcf.toString();
+    }
+    catch (err) {
+        if (err instanceof EvalError) {
+            $PdivQ.innerHTML = err.message;
+            $PmodQ.innerHTML = err.message;
+            $hcf.innerHTML = err.message;
+        }
+        else
+            throw err;
+    }
+}
+function f() {
+    readPolyFromChart(rationals_1.readRational, rationals_1.Rational);
+}
+function g() {
+    readPolyFromChart(float_1.readFloat, float_1.FloatNumber);
+}
+$inputP.oninput = f;
+$inputQ.oninput = f;
+$mode.addEventListener('change', function () {
+    $$ins.forEach(function (ele) { return ele.value = ''; });
+    $$outs.forEach(function (ele) { return ele.innerHTML = ''; });
+    if ($mode.value === 'rational') {
+        $inputP.oninput = f;
+        $inputQ.oninput = f;
+    }
+    else if ($mode.value === 'real') {
+        $inputP.oninput = g;
+        $inputQ.oninput = g;
+    }
+});
+// sample
+$inputP.value = '2/1 2 -1/5 1 4/3 0';
+$P.innerHTML = '(2)x<sup>2</sup> + (-1/5)x + (4/3)';
+
+},{"./float":1,"./polynomials":3,"./rationals":4}],3:[function(require,module,exports){
 "use strict";
 /**
  * polynomials
@@ -63,6 +174,11 @@ var Polynomial = /** @class */ (function () {
         for (var i = 0; i < arrayLength; ++i)
             this.coef[i] = new C();
     }
+    Polynomial.prototype.makeCopy = function () {
+        var res = new Polynomial(this.ctor);
+        res.copyFrom(this);
+        return res;
+    };
     Polynomial.prototype.deleteTrailingZero = function () {
         for (var i = this.length() - 1; i > -1; --i) {
             if (!this.coef[i].isNull())
@@ -84,8 +200,7 @@ var Polynomial = /** @class */ (function () {
             this.coef[i] = o.coef[i];
     };
     Polynomial.prototype.addBy = function (o) {
-        var long = Math.max(this.length(), o.length());
-        var res = new Polynomial(this.ctor, long);
+        var res = new Polynomial(this.ctor, Math.max(this.length(), o.length()));
         res.copyFrom(this);
         for (var i = 0; i < o.length(); ++i)
             res.coef[i] = res.coef[i].addBy(o.coef[i]);
@@ -114,8 +229,7 @@ var Polynomial = /** @class */ (function () {
             if (n <= 0)
                 return p;
             var deg = p.degree();
-            var res = new Polynomial(_this.ctor, p.length());
-            res.copyFrom(p);
+            var res = p.makeCopy();
             for (var i = deg; i > -1; --i) {
                 res.coef[i + n] = res.coef[i];
                 res.coef[i] = new _this.ctor();
@@ -128,18 +242,15 @@ var Polynomial = /** @class */ (function () {
         var ndeg = this.degree();
         var ddeg = o.degree();
         if (ndeg < ddeg) {
-            var copy = new Polynomial(this.ctor, this.length());
-            copy.copyFrom(this);
             return {
                 q: new Polynomial(this.ctor, 0),
-                r: copy
+                r: this.makeCopy()
             };
         }
         var nden = new Polynomial(this.ctor, this.length());
-        var r = new Polynomial(this.ctor, this.length());
-        var q = new Polynomial(this.ctor, this.length());
         nden.copyFrom(o);
-        r.copyFrom(this);
+        var r = this.makeCopy();
+        var q = new Polynomial(this.ctor, this.length());
         while (ndeg >= ddeg) {
             var d2 = shiftRight(nden, ndeg - ddeg);
             q.coef[ndeg - ddeg] = r.coef[ndeg].dividedBy(d2.coef[ndeg]);
@@ -176,18 +287,29 @@ var Polynomial = /** @class */ (function () {
             .reverse()
             .map(function (p) { return p[0].toString() + 'x^' + p[1]; })
             .join(' + ')
-            .replace('x^0', '').replace('x^1', 'x');
+            .replace('x^0', '').replace('x^1 ', 'x ')
+            .replace(/x\^(\d+)/g, 'x<sup>$1</sup>');
     };
     return Polynomial;
 }());
 exports.Polynomial = Polynomial;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 /**
  * rational numbers
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+function readRational(input) {
+    var _a = input.split('/').map(function (e) { return parseInt(e); }), num = _a[0], den = _a[1];
+    if (typeof num !== 'undefined' && !isNaN(num)) {
+        if (typeof num !== 'undefined' && !isNaN(den))
+            return new Rational(num, den);
+        return new Rational(num, 1);
+    }
+    return new Rational();
+}
+exports.readRational = readRational;
 function hcf(a, b) {
     if (b === 0)
         return a;
@@ -198,7 +320,7 @@ var Rational = /** @class */ (function () {
         if (numerator === void 0) { numerator = 0; }
         if (denominator === void 0) { denominator = 1; }
         if (denominator === 0) {
-            throw Error("Division par zéro!");
+            throw new EvalError('Error: Division par zéro!');
         }
         this.numerator = numerator;
         this.denominator = denominator;
@@ -241,21 +363,4 @@ var Rational = /** @class */ (function () {
 }());
 exports.Rational = Rational;
 
-},{}],4:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var rationals_1 = require("./rationals");
-var polynomials_1 = require("./polynomials");
-var float_1 = require("./float");
-var v = new polynomials_1.Polynomial(rationals_1.Rational, 10);
-v.copyFromArray([new rationals_1.Rational(), new rationals_1.Rational(), new rationals_1.Rational(-2, 14), new rationals_1.Rational(), new rationals_1.Rational(1, 89)]);
-var u = new polynomials_1.Polynomial(rationals_1.Rational, 10);
-u.copyFromArray([new rationals_1.Rational(), new rationals_1.Rational(), new rationals_1.Rational(4, 21), new rationals_1.Rational(-1, 4), new rationals_1.Rational(-3, 1)]);
-var x = new polynomials_1.Polynomial(float_1.FloatNumber, 10);
-x.copyFromArray([new float_1.FloatNumber(1), new float_1.FloatNumber(5), new float_1.FloatNumber(), new float_1.FloatNumber(0), new float_1.FloatNumber(9)]);
-var y = new polynomials_1.Polynomial(float_1.FloatNumber, 10);
-y.copyFromArray([new float_1.FloatNumber(4), new float_1.FloatNumber(), new float_1.FloatNumber(3.6), new float_1.FloatNumber(-1)]);
-document.body.innerHTML =
-    ("u:   " + u.toString() + "<br/>\nv:    " + v.toString() + "<br/>\nu+v:  " + v.addBy(u).toString() + "<br/>\nu-v:  " + v.subtractBy(u).toString() + "<br/>\nu*v:  " + v.multiplyBy(u).toString() + "<br/>\nu/v:  " + u.dividedBy(v).q.toString() + "<br/>\nu%v:  " + u.dividedBy(v).r.toString() + "<br/>\nhcf:  " + v.hcf(u).toString() + "<br/>\nx:    " + x.toString() + "<br/>\ny:    " + y.toString() + "<br/>\nx+y:  " + x.addBy(y).toString() + "<br/>\nx-y:  " + x.subtractBy(y).toString() + "<br/>\nx*y:  " + x.multiplyBy(y).toString() + "<br/>\nx/y:  " + x.dividedBy(y).q.toString() + "<br/>\nx%y:  " + x.dividedBy(y).r.toString() + "<br/>\nhcf:  " + x.hcf(y).toString() + "<br/>\n").replace(/\^(\d+)/g, '<sup>$1</sup>');
-
-},{"./float":1,"./polynomials":2,"./rationals":3}]},{},[4]);
+},{}]},{},[2]);

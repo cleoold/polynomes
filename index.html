@@ -36,33 +36,36 @@
                 <div class="box-label">
                     <span>Polynôme P(x)</span>
                 </div>
-                <input type="text" id="poly-1" />
+                <input type="text" id="poly-1" autocomplete="off" />
                 <div class="box-label">
                     <span>Polynôme Q(x)</span>
                 </div>
-                <input type="text" id="poly-2" />
+                <input type="text" id="poly-2" autocomplete="off" />
             </div>
             <div class="comp-results">
                 <div class="box-label"><span>Votre P(x)</span></div>
-                <div id="display-poly1"></div>
+                <div id="display-poly1" class="display-poly"><span></span></div>
                 <div class="box-label"><span>Votre Q(x)</span></div>
-                <div id="display-poly2"></div>
+                <div id="display-poly2" class="display-poly"><span></span></div>
                 <div class="box-label"><span>Sum (P+Q)(x)</span></div>
-                <div id="display-polyadd"></div>
+                <div id="display-polyadd" class="display-poly"><span></span></div>
                 <div class="box-label"><span>Soustraction (P-Q)(x)</span></div>
-                <div id="display-polysub"></div>
+                <div id="display-polysub" class="display-poly"><span></span></div>
                 <div class="box-label"><span>Multiplication PQ(x)</span></div>
-                <div id="display-polymult"></div>
+                <div id="display-polymult" class="display-poly"><span></span></div>
                 <div class="box-label"><span>Quotient (P/Q)(x)</span></div>
-                <div id="display-polydivq"></div>
+                <div id="display-polydivq" class="display-poly"><span></span></div>
                 <div class="box-label"><span>Reste (P%Q)(x)</span></div>
-                <div id="display-polydivr"></div>
+                <div id="display-polydivr" class="display-poly"><span></span></div>
                 <div class="box-label"><span>HCF(P,Q)(x)</span></div>
-                <div id="display-polygcd"></div>
+                <div id="display-polygcd" class="display-poly"><span></span></div>
             </div>
         </div>
+        <footer>
+            Have fun. (c) 2019 cleooldsaty.
+        </footer>
     </div>
 </body>
 
-
+<script type="text/javascript" async src="js/bundle.js"></script>
 </html>
