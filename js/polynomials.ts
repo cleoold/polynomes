@@ -3,6 +3,14 @@
  */
 
 
+
+function hcf<NumType>(a: Polynomial<NumType>, b: Polynomial<NumType>): Polynomial<NumType> {
+    if (b.isNull())
+        return a;
+    return hcf(b, a.dividedBy(b).r);
+}
+
+
 export class Polynomial<NumType> {
 
     coef: Array<NumType>;
@@ -13,6 +21,14 @@ export class Polynomial<NumType> {
         this.coef = Array(arrayLength);
         for (let i = 0; i < arrayLength; ++i)
             this.coef[i] = new C();
+    }
+
+    deleteTrailingZero(): void {
+        for (let i = this.length()-1; i > -1; --i) {
+            if (!(this.coef[i] as any).isNull())
+                break;
+            this.coef.pop();
+        }
     }
 
     length(): number {
@@ -37,6 +53,7 @@ export class Polynomial<NumType> {
         res.copyFrom(this);
         for (let i = 0; i < o.length(); ++i)
             res.coef[i] = res.coef[i].addBy(o.coef[i]);
+        res.deleteTrailingZero();
         return res;
     }
 
@@ -57,6 +74,7 @@ export class Polynomial<NumType> {
                 res.coef[i+j] = (res.coef[i+j] as any).addBy(
                     (this.coef[i] as any).multiplyBy(o.coef[j])
                 );
+        res.deleteTrailingZero();
         return res;
     }
 
@@ -65,14 +83,14 @@ export class Polynomial<NumType> {
         const shiftRight = (p: Polynomial<NumType>, n: number): Polynomial<NumType> => {
             if (n <= 0) return p;
             const deg = p.degree();
-            let res = new Polynomial<NumType>(this.ctor, this.length());
+            let res = new Polynomial<NumType>(this.ctor, p.length());
             res.copyFrom(p);
             for (let i = deg; i > -1; --i)
             {
                 res.coef[i+n] = res.coef[i];
                 res.coef[i] = new this.ctor();
             }
-            return p;
+            return res;
         }
 
         const mapMult = (p: Polynomial<NumType>, n: NumType): void => {
@@ -82,9 +100,11 @@ export class Polynomial<NumType> {
         let ndeg = this.degree();
         const ddeg = o.degree();
         if (ndeg < ddeg) {
+            let copy = new Polynomial<NumType>(this.ctor, this.length());
+            copy.copyFrom(this);
             return {
                 q: new Polynomial<NumType>(this.ctor, 0),
-                r : this
+                r : copy
             };
         }
 
@@ -101,9 +121,15 @@ export class Polynomial<NumType> {
             r = (r as any).subtractBy(d2);
             ndeg = r.degree();
         }
+        q.deleteTrailingZero();
+        r.deleteTrailingZero();
         return {
             q: q, r: r
         };
+    }
+
+    hcf(o: Polynomial<NumType>): Polynomial<NumType> {
+        return hcf(this, o);
     }
 
     degree(): number {
@@ -113,10 +139,21 @@ export class Polynomial<NumType> {
         return -1;
     }
 
+    isNull(): boolean {
+        return this.coef.every((each: any) => typeof each === 'undefined' || each.isNull());
+    }
+
+    toStringArr(): Array<Array<string | number>> {
+        return this.coef.map((each, i) => [each.toString(), i]).reverse();
+    }
+
     toString(): string {
-        if (this.coef.every((each: any) => each.isNull()))
+        if (this.isNull())
             return '0';
-        return this.coef.map((each, i) => each.toString() + 'x^' + i)
+        return this.coef.map((each, i) => [each, i])
+            .filter(t => !(t[0] as any).isNull())
+            .reverse()
+            .map(p => p[0].toString() + 'x^' + p[1])
             .join(' + ')
             .replace('x^0', '').replace('x^1', 'x');
     }

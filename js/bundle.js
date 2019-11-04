@@ -11,6 +11,11 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+function hcf(a, b) {
+    if (b.isNull())
+        return a;
+    return hcf(b, a.dividedBy(b).r);
+}
 var Polynomial = /** @class */ (function () {
     function Polynomial(C, arrayLength) {
         if (arrayLength === void 0) { arrayLength = 0; }
@@ -19,6 +24,13 @@ var Polynomial = /** @class */ (function () {
         for (var i = 0; i < arrayLength; ++i)
             this.coef[i] = new C();
     }
+    Polynomial.prototype.deleteTrailingZero = function () {
+        for (var i = this.length() - 1; i > -1; --i) {
+            if (!this.coef[i].isNull())
+                break;
+            this.coef.pop();
+        }
+    };
     Polynomial.prototype.length = function () {
         return this.coef.length;
     };
@@ -38,6 +50,7 @@ var Polynomial = /** @class */ (function () {
         res.copyFrom(this);
         for (var i = 0; i < o.length(); ++i)
             res.coef[i] = res.coef[i].addBy(o.coef[i]);
+        res.deleteTrailingZero();
         return res;
     };
     Polynomial.prototype.subtractBy = function (o) {
@@ -53,6 +66,7 @@ var Polynomial = /** @class */ (function () {
         for (var i = 0; i < this.length(); ++i)
             for (var j = 0; j < o.length(); ++j)
                 res.coef[i + j] = res.coef[i + j].addBy(this.coef[i].multiplyBy(o.coef[j]));
+        res.deleteTrailingZero();
         return res;
     };
     Polynomial.prototype.dividedBy = function (o) {
@@ -61,13 +75,13 @@ var Polynomial = /** @class */ (function () {
             if (n <= 0)
                 return p;
             var deg = p.degree();
-            var res = new Polynomial(_this.ctor, _this.length());
+            var res = new Polynomial(_this.ctor, p.length());
             res.copyFrom(p);
             for (var i = deg; i > -1; --i) {
                 res.coef[i + n] = res.coef[i];
                 res.coef[i] = new _this.ctor();
             }
-            return p;
+            return res;
         };
         var mapMult = function (p, n) {
             p.coef = p.coef.map(function (e) { return e.multiplyBy(n); });
@@ -75,9 +89,11 @@ var Polynomial = /** @class */ (function () {
         var ndeg = this.degree();
         var ddeg = o.degree();
         if (ndeg < ddeg) {
+            var copy = new Polynomial(this.ctor, this.length());
+            copy.copyFrom(this);
             return {
                 q: new Polynomial(this.ctor, 0),
-                r: this
+                r: copy
             };
         }
         var nden = new Polynomial(this.ctor, this.length());
@@ -92,9 +108,14 @@ var Polynomial = /** @class */ (function () {
             r = r.subtractBy(d2);
             ndeg = r.degree();
         }
+        q.deleteTrailingZero();
+        r.deleteTrailingZero();
         return {
             q: q, r: r
         };
+    };
+    Polynomial.prototype.hcf = function (o) {
+        return hcf(this, o);
     };
     Polynomial.prototype.degree = function () {
         for (var i = this.length() - 1; i > -1; --i)
@@ -102,10 +123,19 @@ var Polynomial = /** @class */ (function () {
                 return i;
         return -1;
     };
+    Polynomial.prototype.isNull = function () {
+        return this.coef.every(function (each) { return typeof each === 'undefined' || each.isNull(); });
+    };
+    Polynomial.prototype.toStringArr = function () {
+        return this.coef.map(function (each, i) { return [each.toString(), i]; }).reverse();
+    };
     Polynomial.prototype.toString = function () {
-        if (this.coef.every(function (each) { return each.isNull(); }))
+        if (this.isNull())
             return '0';
-        return this.coef.map(function (each, i) { return each.toString() + 'x^' + i; })
+        return this.coef.map(function (each, i) { return [each, i]; })
+            .filter(function (t) { return !t[0].isNull(); })
+            .reverse()
+            .map(function (p) { return p[0].toString() + 'x^' + p[1]; })
             .join(' + ')
             .replace('x^0', '').replace('x^1', 'x');
     };
@@ -178,10 +208,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var rationals_1 = require("./rationals");
 var polynomials_1 = require("./polynomials");
 var v = new polynomials_1.Polynomial(rationals_1.Rational, 10);
-v.copyFromArray([new rationals_1.Rational(3, 4), new rationals_1.Rational(-2, 7), new rationals_1.Rational(-2, 14), new rationals_1.Rational(), new rationals_1.Rational(1, 89)]);
+v.copyFromArray([new rationals_1.Rational(), new rationals_1.Rational(), new rationals_1.Rational(-2, 14), new rationals_1.Rational(), new rationals_1.Rational(1, 89)]);
 var u = new polynomials_1.Polynomial(rationals_1.Rational, 10);
-u.copyFromArray([new rationals_1.Rational(), new rationals_1.Rational(), new rationals_1.Rational(4, 21), new rationals_1.Rational(), new rationals_1.Rational(-3, 1)]);
+u.copyFromArray([new rationals_1.Rational(), new rationals_1.Rational(), new rationals_1.Rational(4, 21), new rationals_1.Rational(-1, 4), new rationals_1.Rational(-3, 1)]);
 document.body.innerHTML =
-    ("u:   " + v.toString() + "<br/>\nv:    " + u.toString() + "<br/>\nu+v:  " + v.addBy(u).toString() + "<br/>\nu-v:  " + v.subtractBy(u).toString() + "<br/>\nu*v:  " + v.multiplyBy(u).toString() + "<br/>\nu/v:  " + v.dividedBy(u).q.toString() + "<br/>\nu%v:  " + v.dividedBy(u).r.toString() + "\n").replace(/\^(\d+)/g, '<sup>$1</sup>');
+    ("u:   " + u.toString() + "<br/>\nv:    " + v.toString() + "<br/>\nu+v:  " + v.addBy(u).toString() + "<br/>\nu-v:  " + v.subtractBy(u).toString() + "<br/>\nu*v:  " + v.multiplyBy(u).toString() + "<br/>\nu/v:  " + u.dividedBy(v).q.toString() + "<br/>\nu%v:  " + u.dividedBy(v).r.toString() + "<br/>\nhcf:  " + v.hcf(u).toString() + "<br/>\n").replace(/\^(\d+)/g, '<sup>$1</sup>');
+console.log(v.toStringArr());
 
 },{"./polynomials":1,"./rationals":2}]},{},[3]);
