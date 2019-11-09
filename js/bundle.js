@@ -120,7 +120,6 @@ exports.ComplexFloat = ComplexFloat;
 /**
  * index page
  */
-var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var rationals_1 = require("./rationals");
 var float_1 = require("./float");
@@ -200,19 +199,19 @@ function readPolyFromChart(read, cls) {
             throw err;
     }
 }
-$inputP.oninput = readPolyFromChart.bind(this, rationals_1.readRational, rationals_1.Rational);
+$inputP.oninput = readPolyFromChart.bind(null, rationals_1.readRational, rationals_1.Rational);
 $inputQ.oninput = $inputP.oninput;
 $mode.addEventListener('change', function () {
     $$ins.forEach(function (ele) { return ele.value = ''; });
     $$outs.forEach(function (ele) { return ele.innerHTML = ''; });
     if ($mode.value === 'rational') {
-        $inputP.oninput = readPolyFromChart.bind(_this, rationals_1.readRational, rationals_1.Rational);
+        $inputP.oninput = readPolyFromChart.bind(null, rationals_1.readRational, rationals_1.Rational);
     }
     else if ($mode.value === 'real') {
-        $inputP.oninput = readPolyFromChart.bind(_this, float_1.readFloat, float_1.FloatNumber);
+        $inputP.oninput = readPolyFromChart.bind(null, float_1.readFloat, float_1.FloatNumber);
     }
     else if ($mode.value === 'complex') {
-        $inputP.oninput = readPolyFromChart.bind(_this, floatcomplex_1.readComplexFloat, floatcomplex_1.ComplexFloat);
+        $inputP.oninput = readPolyFromChart.bind(null, floatcomplex_1.readComplexFloat, floatcomplex_1.ComplexFloat);
     }
     $inputQ.oninput = $inputP.oninput;
 });

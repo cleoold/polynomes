@@ -14,9 +14,9 @@ function hcf<NumType>(a: Polynomial<NumType>, b: Polynomial<NumType>): Polynomia
 export class Polynomial<NumType> {
 
     coef: Array<NumType>;
-    ctor: { new(): NumType };
+    ctor: new () => NumType;
 
-    constructor(C: { new(): NumType }, arrayLength: number = 0) {
+    constructor(C: new () => NumType, arrayLength: number = 0) {
         this.ctor = C;
         this.coef = Array(arrayLength);
         for (let i = 0; i < arrayLength; ++i)

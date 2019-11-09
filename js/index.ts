@@ -27,7 +27,7 @@ const $$outs = [$P, $Q, $PaddQ, $PsubQ, $PmulQ, $PdivQ, $PmodQ, $hcf];
 const $mode = $('#set-field');
 
 
-function readPoly<NumType>(read: (_:string) => NumType, C: { new(): NumType }, strVal: string): Polynomial<NumType> {
+function readPoly<NumType>(read: (_:string) => NumType, C: new () => NumType, strVal: string): Polynomial<NumType> {
     const strings = strVal.split(' ');
     let arr = [];
     for (let i = 0; i < strings.length; i += 2)
@@ -85,7 +85,7 @@ function readPolyFromChart<NumType>(read: (_:string) => NumType, cls: new () => 
 }
 
 
-$inputP.oninput = readPolyFromChart.bind(this, readRational, Rational);
+$inputP.oninput = readPolyFromChart.bind(null, readRational, Rational);
 $inputQ.oninput = $inputP.oninput;
 
 
@@ -93,11 +93,11 @@ $mode.addEventListener('change', () => {
     $$ins.forEach(ele => ele.value = '');
     $$outs.forEach(ele => ele.innerHTML = '');
     if ($mode.value === 'rational') {
-        $inputP.oninput = readPolyFromChart.bind(this, readRational, Rational);
+        $inputP.oninput = readPolyFromChart.bind(null, readRational, Rational);
     } else if ($mode.value === 'real') {
-        $inputP.oninput = readPolyFromChart.bind(this, readFloat, FloatNumber);
+        $inputP.oninput = readPolyFromChart.bind(null, readFloat, FloatNumber);
     } else if ($mode.value === 'complex') {
-        $inputP.oninput = readPolyFromChart.bind(this, readComplexFloat, ComplexFloat);
+        $inputP.oninput = readPolyFromChart.bind(null, readComplexFloat, ComplexFloat);
     }
     $inputQ.oninput = $inputP.oninput;
 })
