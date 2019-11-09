@@ -156,6 +156,7 @@ export class Polynomial<NumType> {
             .map(p => p[0].toString() + 'x^' + p[1])
             .join(' + ')
             .replace('x^0', '').replace('x^1 ', 'x ')
-            .replace(/x\^(\d+)/g, 'x<sup>$1</sup>');
+            .replace(/x\^(\d+)/g, 'x<sup>$1</sup>')
+            .replace(/\_(\d+)/g, '<sub>$1</sub>');
     }
 }

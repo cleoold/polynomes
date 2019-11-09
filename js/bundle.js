@@ -1,6 +1,43 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 /**
+ * boolean (in-or, and)
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+function readBooleanNum(input) {
+    return new BooleanNum(parseInt(input));
+}
+exports.readBooleanNum = readBooleanNum;
+var BooleanNum = /** @class */ (function () {
+    function BooleanNum(num) {
+        if (num === void 0) { num = false; }
+        this.num = (num === 0 || num === false) ? false : true;
+    }
+    BooleanNum.prototype.addBy = function (o) {
+        return new BooleanNum(this.num || o.num);
+    };
+    BooleanNum.prototype.subtractBy = function (o) {
+        return this.addBy(o.negate());
+    };
+    BooleanNum.prototype.multiplyBy = function (o) {
+        return new BooleanNum(this.num && o.num);
+    };
+    BooleanNum.prototype.negate = function () {
+        return new BooleanNum(!this.num);
+    };
+    BooleanNum.prototype.isNull = function () {
+        return this.num === false;
+    };
+    BooleanNum.prototype.toString = function () {
+        return this.isNull() ? '(0)' : '(1)';
+    };
+    return BooleanNum;
+}());
+exports.BooleanNum = BooleanNum;
+
+},{}],2:[function(require,module,exports){
+"use strict";
+/**
  * float numbers
  */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -44,7 +81,7 @@ var FloatNumber = /** @class */ (function () {
 }());
 exports.FloatNumber = FloatNumber;
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
@@ -115,7 +152,7 @@ var ComplexFloat = /** @class */ (function () {
 }());
 exports.ComplexFloat = ComplexFloat;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 /**
  * index page
@@ -124,6 +161,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var rationals_1 = require("./rationals");
 var float_1 = require("./float");
 var floatcomplex_1 = require("./floatcomplex");
+var integer_1 = require("./integer");
+var boolean_1 = require("./boolean");
 var polynomials_1 = require("./polynomials");
 var $ = document.querySelector.bind(document);
 var $inputP = $('#poly-1');
@@ -213,13 +252,66 @@ $mode.addEventListener('change', function () {
     else if ($mode.value === 'complex') {
         $inputP.oninput = readPolyFromChart.bind(null, floatcomplex_1.readComplexFloat, floatcomplex_1.ComplexFloat);
     }
+    else if ($mode.value === 'integermodn') {
+        var n = parseInt(prompt('Veuillez entrer N (classe de congruence de modulo)'));
+        if (!(n > 0))
+            n = 7;
+        $inputP.oninput = readPolyFromChart.bind(null, integer_1.readIntegerModN(n), integer_1.IntegerModN(n));
+    }
+    else if ($mode.value === 'boolean') {
+        $inputP.oninput = readPolyFromChart.bind(null, boolean_1.readBooleanNum, boolean_1.BooleanNum);
+    }
     $inputQ.oninput = $inputP.oninput;
 });
 // example
 $inputP.value = '2/1 2 -1/5 1 4/3 0';
 $P.innerHTML = '(2)x<sup>2</sup> + (-1/5)x + (4/3)';
 
-},{"./float":1,"./floatcomplex":2,"./polynomials":4,"./rationals":5}],4:[function(require,module,exports){
+},{"./boolean":1,"./float":2,"./floatcomplex":3,"./integer":5,"./polynomials":6,"./rationals":7}],5:[function(require,module,exports){
+"use strict";
+/**
+ * integer mod n
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+function readIntegerModN(n) {
+    var ctor = IntegerModN(n);
+    return function (input) { return new ctor(parseInt(input)); };
+}
+exports.readIntegerModN = readIntegerModN;
+function IntegerModN(n) {
+    var A = /** @class */ (function () {
+        function A(num) {
+            if (num === void 0) { num = 0; }
+            this.mod = n;
+            this.num = num % this.mod;
+            if (this.num < 0)
+                this.num += this.mod;
+        }
+        A.prototype.addBy = function (o) {
+            return new A((this.num + o.num) % this.mod);
+        };
+        A.prototype.subtractBy = function (o) {
+            return new A((this.num - o.num) % this.mod);
+        };
+        A.prototype.multiplyBy = function (o) {
+            return new A((this.num * o.num) % this.mod);
+        };
+        A.prototype.negate = function () {
+            return new A(-this.num % this.mod);
+        };
+        A.prototype.isNull = function () {
+            return this.num === 0;
+        };
+        A.prototype.toString = function () {
+            return '[' + this.num + ']' + '_' + this.mod;
+        };
+        return A;
+    }());
+    return A;
+}
+exports.IntegerModN = IntegerModN;
+
+},{}],6:[function(require,module,exports){
 "use strict";
 /**
  * polynomials
@@ -359,13 +451,14 @@ var Polynomial = /** @class */ (function () {
             .map(function (p) { return p[0].toString() + 'x^' + p[1]; })
             .join(' + ')
             .replace('x^0', '').replace('x^1 ', 'x ')
-            .replace(/x\^(\d+)/g, 'x<sup>$1</sup>');
+            .replace(/x\^(\d+)/g, 'x<sup>$1</sup>')
+            .replace(/\_(\d+)/g, '<sub>$1</sub>');
     };
     return Polynomial;
 }());
 exports.Polynomial = Polynomial;
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 /**
  * rational numbers
@@ -434,4 +527,4 @@ var Rational = /** @class */ (function () {
 }());
 exports.Rational = Rational;
 
-},{}]},{},[3]);
+},{}]},{},[4]);

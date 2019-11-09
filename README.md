@@ -40,6 +40,14 @@ in: 7 766 -5.4j 763
 PQ: (14+35j)x^1665 + (27-10.8j)x^1662 + (-16.1+46.9j)x^1309 + (36.18+12.42j)x^1306
 ```
 
+```bash
+# classe de congruence modulo 24
+in: 25 0 -324 1
+in: 44 0 95 1
+...
+PQ: [12]_24x^2 + [23]_24x + [20]24
+```
+
 #### fonctionner
 cette page Web fonctionne sur Typescript et Less.js. Après avoir touché des fichiers, faire
 ```bash

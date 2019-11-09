@@ -6,6 +6,8 @@
 import { Rational, readRational } from './rationals';
 import { FloatNumber, readFloat } from './float'
 import { ComplexFloat, readComplexFloat } from './floatcomplex';
+import { IntegerModN, readIntegerModN } from './integer';
+import { BooleanNum, readBooleanNum } from './boolean';
 import { Polynomial } from './polynomials';
 
 
@@ -98,6 +100,12 @@ $mode.addEventListener('change', () => {
         $inputP.oninput = readPolyFromChart.bind(null, readFloat, FloatNumber);
     } else if ($mode.value === 'complex') {
         $inputP.oninput = readPolyFromChart.bind(null, readComplexFloat, ComplexFloat);
+    } else if ($mode.value === 'integermodn') {
+        let n = parseInt(prompt('Veuillez entrer N (classe de congruence de modulo)'));
+        if (!(n > 0)) n = 7;
+        $inputP.oninput = readPolyFromChart.bind(null, readIntegerModN(n), IntegerModN(n));
+    } else if ($mode.value === 'boolean') {
+        $inputP.oninput = readPolyFromChart.bind(null, readBooleanNum, BooleanNum);
     }
     $inputQ.oninput = $inputP.oninput;
 })
