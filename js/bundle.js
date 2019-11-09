@@ -46,12 +46,85 @@ exports.FloatNumber = FloatNumber;
 
 },{}],2:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * float complex (a + bi)
+ */
+function readComplexFloat(input) {
+    var matchedBoth = /^([\+\-]?\d+(\.\d+)?)([\+\-](\d+(\.\d+)?)(i|j))$/ig.exec(input);
+    if (matchedBoth !== null)
+        return new ComplexFloat(parseFloat(matchedBoth[1]), parseFloat(matchedBoth[4]));
+    var matchedReal = /^([\+\-]?\d+(\.\d+)?)$/ig.exec(input);
+    if (matchedReal !== null)
+        return new ComplexFloat(parseFloat(matchedReal[0]), 0);
+    var matchedImg = /^([\+\-]?(\d+(\.\d+)?)(i|j))$/ig.exec(input);
+    if (matchedImg !== null)
+        return new ComplexFloat(0, parseFloat(matchedImg[0]));
+    return new ComplexFloat();
+}
+exports.readComplexFloat = readComplexFloat;
+function trail(n) {
+    return (Math.round(n * 1e3) / 1e3);
+}
+function eq(a, b) {
+    return Math.abs(a - b) < 1e-5;
+}
+var ComplexFloat = /** @class */ (function () {
+    function ComplexFloat(re, im) {
+        if (re === void 0) { re = 0; }
+        if (im === void 0) { im = 0; }
+        this.re = re;
+        this.im = im;
+    }
+    ComplexFloat.prototype.addBy = function (o) {
+        return new ComplexFloat(this.re + o.re, this.im + o.im);
+    };
+    ComplexFloat.prototype.subtractBy = function (o) {
+        return new ComplexFloat(this.re - o.re, this.im - o.im);
+    };
+    ComplexFloat.prototype.multiplyBy = function (o) {
+        return new ComplexFloat(this.re * o.re - this.im * o.im, this.im * o.re + this.re * o.im);
+    };
+    /* not well defined, skip
+    dividedBy(o: ComplexFloat): ComplexFloat {
+        const den: number = o.re * o.re + o.im * o.im;
+        return new ComplexFloat(
+            (this.re * o.re + this.im * o.im) / den,
+            (this.im * o.re - this.re * o.im) / den
+        );
+    }
+    */
+    ComplexFloat.prototype.negate = function () {
+        return new ComplexFloat(-this.re, this.im);
+    };
+    ComplexFloat.prototype.isNull = function () {
+        return eq(this.re, 0) && eq(this.im, 0);
+    };
+    ComplexFloat.prototype.toString = function () {
+        if (!eq(this.re, 0) && this.im > 0)
+            return '(' + trail(this.re) + '+' + trail(this.im) + 'j)';
+        if (!eq(this.re, 0) && this.im < 0)
+            return '(' + trail(this.re) + trail(this.im) + 'j)';
+        if (!eq(this.re, 0) && eq(this.im, 0))
+            return '(' + trail(this.re) + ')';
+        if (eq(this.re, 0) && !eq(this.im, 0))
+            return '(' + trail(this.im) + 'j)';
+        return '(0)';
+    };
+    return ComplexFloat;
+}());
+exports.ComplexFloat = ComplexFloat;
+
+},{}],3:[function(require,module,exports){
+"use strict";
 /**
  * index page
  */
+var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var rationals_1 = require("./rationals");
 var float_1 = require("./float");
+var floatcomplex_1 = require("./floatcomplex");
 var polynomials_1 = require("./polynomials");
 var $ = document.querySelector.bind(document);
 var $inputP = $('#poly-1');
@@ -108,6 +181,9 @@ function readPolyFromChart(read, cls) {
     var mul = Px.multiplyBy(Qx);
     $PmulQ.innerHTML = mul.toString();
     try {
+        if (!('dividedBy' in Px.coef[0])) {
+            throw EvalError('le calcul n\'est pas bien défini');
+        }
         var _a = Px.dividedBy(Qx), divq = _a.q, divr = _a.r;
         $PdivQ.innerHTML = divq.toString();
         $PmodQ.innerHTML = divr.toString();
@@ -124,31 +200,27 @@ function readPolyFromChart(read, cls) {
             throw err;
     }
 }
-function f() {
-    readPolyFromChart(rationals_1.readRational, rationals_1.Rational);
-}
-function g() {
-    readPolyFromChart(float_1.readFloat, float_1.FloatNumber);
-}
-$inputP.oninput = f;
-$inputQ.oninput = f;
+$inputP.oninput = readPolyFromChart.bind(this, rationals_1.readRational, rationals_1.Rational);
+$inputQ.oninput = $inputP.oninput;
 $mode.addEventListener('change', function () {
     $$ins.forEach(function (ele) { return ele.value = ''; });
     $$outs.forEach(function (ele) { return ele.innerHTML = ''; });
     if ($mode.value === 'rational') {
-        $inputP.oninput = f;
-        $inputQ.oninput = f;
+        $inputP.oninput = readPolyFromChart.bind(_this, rationals_1.readRational, rationals_1.Rational);
     }
     else if ($mode.value === 'real') {
-        $inputP.oninput = g;
-        $inputQ.oninput = g;
+        $inputP.oninput = readPolyFromChart.bind(_this, float_1.readFloat, float_1.FloatNumber);
     }
+    else if ($mode.value === 'complex') {
+        $inputP.oninput = readPolyFromChart.bind(_this, floatcomplex_1.readComplexFloat, floatcomplex_1.ComplexFloat);
+    }
+    $inputQ.oninput = $inputP.oninput;
 });
-// sample
+// example
 $inputP.value = '2/1 2 -1/5 1 4/3 0';
 $P.innerHTML = '(2)x<sup>2</sup> + (-1/5)x + (4/3)';
 
-},{"./float":1,"./polynomials":3,"./rationals":4}],3:[function(require,module,exports){
+},{"./float":1,"./floatcomplex":2,"./polynomials":4,"./rationals":5}],4:[function(require,module,exports){
 "use strict";
 /**
  * polynomials
@@ -294,7 +366,7 @@ var Polynomial = /** @class */ (function () {
 }());
 exports.Polynomial = Polynomial;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 /**
  * rational numbers
@@ -363,4 +435,4 @@ var Rational = /** @class */ (function () {
 }());
 exports.Rational = Rational;
 
-},{}]},{},[2]);
+},{}]},{},[3]);

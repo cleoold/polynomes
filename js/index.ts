@@ -5,6 +5,7 @@
 
 import { Rational, readRational } from './rationals';
 import { FloatNumber, readFloat } from './float'
+import { ComplexFloat, readComplexFloat } from './floatcomplex';
 import { Polynomial } from './polynomials';
 
 
@@ -65,6 +66,9 @@ function readPolyFromChart<NumType>(read: (_:string) => NumType, cls: new () => 
     const mul = Px.multiplyBy(Qx);
     $PmulQ.innerHTML = mul.toString();
     try {
+        if (!('dividedBy' in Px.coef[0])) {
+            throw EvalError('le calcul n\'est pas bien défini');
+        }
         const {q: divq, r: divr} = Px.dividedBy(Qx);
         $PdivQ.innerHTML = divq.toString();
         $PmodQ.innerHTML = divr.toString();
@@ -81,30 +85,23 @@ function readPolyFromChart<NumType>(read: (_:string) => NumType, cls: new () => 
 }
 
 
-function f() {
-    readPolyFromChart(readRational, Rational);
-}
-
-function g() {
-    readPolyFromChart(readFloat, FloatNumber);
-}
-
-$inputP.oninput = f;
-$inputQ.oninput = f;
+$inputP.oninput = readPolyFromChart.bind(this, readRational, Rational);
+$inputQ.oninput = $inputP.oninput;
 
 
 $mode.addEventListener('change', () => {
     $$ins.forEach(ele => ele.value = '');
     $$outs.forEach(ele => ele.innerHTML = '');
     if ($mode.value === 'rational') {
-        $inputP.oninput = f;
-        $inputQ.oninput = f;
+        $inputP.oninput = readPolyFromChart.bind(this, readRational, Rational);
     } else if ($mode.value === 'real') {
-        $inputP.oninput = g;
-        $inputQ.oninput = g;
+        $inputP.oninput = readPolyFromChart.bind(this, readFloat, FloatNumber);
+    } else if ($mode.value === 'complex') {
+        $inputP.oninput = readPolyFromChart.bind(this, readComplexFloat, ComplexFloat);
     }
+    $inputQ.oninput = $inputP.oninput;
 })
 
-// sample
+// example
 $inputP.value = '2/1 2 -1/5 1 4/3 0';
 $P.innerHTML = '(2)x<sup>2</sup> + (-1/5)x + (4/3)';
