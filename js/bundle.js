@@ -243,23 +243,25 @@ $inputQ.oninput = $inputP.oninput;
 $mode.addEventListener('change', function () {
     $$ins.forEach(function (ele) { return ele.value = ''; });
     $$outs.forEach(function (ele) { return ele.innerHTML = ''; });
-    if ($mode.value === 'rational') {
-        $inputP.oninput = readPolyFromChart.bind(null, rationals_1.readRational, rationals_1.Rational);
-    }
-    else if ($mode.value === 'real') {
-        $inputP.oninput = readPolyFromChart.bind(null, float_1.readFloat, float_1.FloatNumber);
-    }
-    else if ($mode.value === 'complex') {
-        $inputP.oninput = readPolyFromChart.bind(null, floatcomplex_1.readComplexFloat, floatcomplex_1.ComplexFloat);
-    }
-    else if ($mode.value === 'integermodn') {
-        var n = parseInt(prompt('Veuillez entrer N (classe de congruence de modulo)'));
-        if (!(n > 0))
-            n = 7;
-        $inputP.oninput = readPolyFromChart.bind(null, integer_1.readIntegerModN(n), integer_1.IntegerModN(n));
-    }
-    else if ($mode.value === 'boolean') {
-        $inputP.oninput = readPolyFromChart.bind(null, boolean_1.readBooleanNum, boolean_1.BooleanNum);
+    switch ($mode.value) {
+        case 'rational':
+            $inputP.oninput = readPolyFromChart.bind(null, rationals_1.readRational, rationals_1.Rational);
+            break;
+        case 'real':
+            $inputP.oninput = readPolyFromChart.bind(null, float_1.readFloat, float_1.FloatNumber);
+            break;
+        case 'complex':
+            $inputP.oninput = readPolyFromChart.bind(null, floatcomplex_1.readComplexFloat, floatcomplex_1.ComplexFloat);
+            break;
+        case 'integermodn':
+            var n = parseInt(prompt('Veuillez entrer N (classe de congruence de modulo)'));
+            if (!(n > 0))
+                n = 7;
+            $inputP.oninput = readPolyFromChart.bind(null, integer_1.readIntegerModN(n), integer_1.IntegerModN(n));
+            break;
+        case 'boolean':
+            $inputP.oninput = readPolyFromChart.bind(null, boolean_1.readBooleanNum, boolean_1.BooleanNum);
+            break;
     }
     $inputQ.oninput = $inputP.oninput;
 });

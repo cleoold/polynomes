@@ -94,18 +94,24 @@ $inputQ.oninput = $inputP.oninput;
 $mode.addEventListener('change', () => {
     $$ins.forEach(ele => ele.value = '');
     $$outs.forEach(ele => ele.innerHTML = '');
-    if ($mode.value === 'rational') {
+    switch ($mode.value) {
+    case 'rational':
         $inputP.oninput = readPolyFromChart.bind(null, readRational, Rational);
-    } else if ($mode.value === 'real') {
+        break;
+    case 'real':
         $inputP.oninput = readPolyFromChart.bind(null, readFloat, FloatNumber);
-    } else if ($mode.value === 'complex') {
+        break;
+    case 'complex':
         $inputP.oninput = readPolyFromChart.bind(null, readComplexFloat, ComplexFloat);
-    } else if ($mode.value === 'integermodn') {
+        break;
+    case 'integermodn':
         let n = parseInt(prompt('Veuillez entrer N (classe de congruence de modulo)'));
         if (!(n > 0)) n = 7;
         $inputP.oninput = readPolyFromChart.bind(null, readIntegerModN(n), IntegerModN(n));
-    } else if ($mode.value === 'boolean') {
+        break;
+    case 'boolean':
         $inputP.oninput = readPolyFromChart.bind(null, readBooleanNum, BooleanNum);
+        break;
     }
     $inputQ.oninput = $inputP.oninput;
 })
