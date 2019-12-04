@@ -84,7 +84,7 @@ td {
 @media only screen and (max-width: 600px) {
   .data-container {
     width: 99%;
-    padding: 2em 0 4em 0;
+    padding: 2em 0 4em;
   }
 }
 .data-container .data-head {
@@ -101,7 +101,7 @@ td {
 }
 .inputs {
   width: 50%;
-  margin: 2em 0 1em 0;
+  margin: 1em 0 1em 0;
   display: grid;
   grid-template-columns: 30% 70%;
   row-gap: 0.7em;

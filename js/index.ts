@@ -23,17 +23,42 @@ const $PmulQ = $('#display-polymult span');
 const $PdivQ = $('#display-polydivq span');
 const $PmodQ = $('#display-polydivr span');
 const $hcf = $('#display-polygcd span');
-const $$ins = [$inputP, $inputQ]
+const $$ins = [$inputP, $inputQ];
 const $$outs = [$P, $Q, $PaddQ, $PsubQ, $PmulQ, $PdivQ, $PmodQ, $hcf];
 
 const $mode = $('#set-field');
+
+
+function checkSlow(strVal: string): boolean {
+    const strings = strVal.split(' ');
+    for (let i = 1; i < strings.length; i += 2)
+        if (parseInt(strings[i]) > 399) return true;
+    return false;
+}
+
+
+function slowMsgToggle(strVal: string): boolean {
+    const $slowMsg = $('.might-be-slow-msg');
+    if (checkSlow(strVal)) {
+        if ($slowMsg !== null) return true;
+        const $slow = document.createElement('p');
+        $slow.innerHTML = 'Ce calcul peut être lent...';
+        $slow.style.color = 'red';
+        $slow.className = 'might-be-slow-msg';
+        $('.data-head').appendChild($slow);
+        return true;
+    }
+    if ($slowMsg === null) return false;
+    $slowMsg.parentNode.removeChild($slowMsg);
+    return false;
+}
 
 
 function readPoly<NumType>(read: (_:string) => NumType, C: new () => NumType, strVal: string): Polynomial<NumType> {
     const strings = strVal.split(' ');
     let arr = [];
     for (let i = 0; i < strings.length; i += 2)
-        arr[strings[i+1]] = read(strings[i]);
+        arr[parseInt(strings[i+1])] = read(strings[i]);
     const res = new Polynomial(C);
     res.copyFromArray(arr);
     return res;
@@ -58,6 +83,7 @@ function readPolyFromChart<NumType>(read: (_:string) => NumType, cls: new () => 
     }
     $P.innerHTML = Px.toString();
     $Q.innerHTML = Qx.toString();
+    slowMsgToggle($inputP.value) || slowMsgToggle($inputQ.value);
 
     if ($inputP.value === '' || $inputQ.value === '') return;
 
