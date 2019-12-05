@@ -352,9 +352,12 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 function hcf(a, b) {
-    if (b.isNull())
-        return a;
-    return hcf(b, a.dividedBy(b).r);
+    while (!b.isNull()) {
+        var t = b;
+        b = a.dividedBy(b).r;
+        a = t;
+    }
+    return a;
 }
 var Polynomial = /** @class */ (function () {
     function Polynomial(C, arrayLength) {
@@ -502,9 +505,12 @@ function readRational(input) {
 }
 exports.readRational = readRational;
 function hcf(a, b) {
-    if (b === 0)
-        return a;
-    return hcf(b, a % b);
+    while (b !== 0) {
+        var t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
 }
 var Rational = /** @class */ (function () {
     function Rational(numerator, denominator) {

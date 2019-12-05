@@ -5,9 +5,12 @@
 
 
 function hcf<NumType>(a: Polynomial<NumType>, b: Polynomial<NumType>): Polynomial<NumType> {
-    if (b.isNull())
-        return a;
-    return hcf(b, a.dividedBy(b).r);
+    while (!b.isNull()) {
+        let t = b;
+        b = a.dividedBy(b).r;
+        a = t;
+    }
+    return a;
 }
 
 

@@ -18,9 +18,12 @@ export function readRational(input: string): Rational {
 
 
 function hcf(a: integer, b: integer): integer {
-    if (b === 0)
-        return a;
-    return hcf(b, a % b);
+    while (b !== 0) {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
 }
 
 
