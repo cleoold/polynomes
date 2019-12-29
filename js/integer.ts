@@ -3,34 +3,27 @@
  */
 
 
-type integer = number;
+import { INumberType, integer } from './numtype';
 
-
-export type IntegerModN_T = {
-    addBy(o: IntegerModN_T): IntegerModN_T;
-    subtractBy(o: IntegerModN_T): IntegerModN_T;
-    multiplyBy(o: IntegerModN_T): IntegerModN_T;
-    negate(o: IntegerModN_T): IntegerModN_T;
-    isNull(): boolean;
-    toString(): string;
-}
-
-
-export function readIntegerModN(n: integer): (input:string) => IntegerModN_T {
+export function readIntegerModN(n: integer): (input:string) => INumberType {
     const ctor = IntegerModN(n);
     return input => new ctor(parseInt(input));
 }
 
 
-export function IntegerModN(n: integer): new (...a) => IntegerModN_T {
+export function IntegerModN(n: integer): new (...a) => INumberType {
 
-class A {
+class A implements INumberType {
     num: integer;
     mod: integer = n;
 
     constructor(num: integer = 0) {
         this.num = num % this.mod;
         if (this.num < 0) this.num += this.mod;
+    }
+
+    get isNull(): boolean {
+        return this.num === 0;
     }
 
     addBy(o: A): A {
@@ -47,10 +40,6 @@ class A {
 
     negate(): A {
         return new A(-this.num % this.mod);
-    }
-
-    isNull(): boolean {
-        return this.num === 0;
     }
 
     toString(): string {

@@ -3,7 +3,7 @@
  */
 
 
-type integer = number;
+import { INumberDivisibleType, integer } from './numtype';
 
 
 export function readRational(input: string): Rational {
@@ -27,7 +27,7 @@ function hcf(a: integer, b: integer): integer {
 }
 
 
-export class Rational {
+export class Rational implements INumberDivisibleType {
 
     numerator: integer;
     denominator: integer;
@@ -48,6 +48,10 @@ export class Rational {
         this.numerator = numerator;
         this.denominator = denominator;
         this.simplify();
+    }
+
+    get isNull(): boolean {
+        return this.numerator === 0;
     }
 
     addBy(o: Rational): Rational {
@@ -83,10 +87,6 @@ export class Rational {
             -this.numerator,
             this.denominator
         );
-    }
-
-    isNull(): boolean {
-        return this.numerator === 0;
     }
 
     toString(): string {

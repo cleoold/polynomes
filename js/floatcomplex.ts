@@ -1,9 +1,9 @@
-import { type } from "os";
-import { parse } from "querystring";
-
 /**
  * float complex (a + bi)
  */
+
+
+import { INumberType } from './numtype';
 
 
 export function readComplexFloat(input: string): ComplexFloat {
@@ -36,7 +36,7 @@ function eq(a: number, b: number) {
     return Math.abs(a - b) < 1e-5;
 }
 
-export class ComplexFloat {
+export class ComplexFloat implements INumberType {
 
     re: number;
     im: number;
@@ -44,6 +44,10 @@ export class ComplexFloat {
     constructor(re: number = 0, im: number = 0) {
         this.re = re;
         this.im = im;
+    }
+
+    get isNull(): boolean {
+        return eq(this.re, 0) && eq(this.im, 0);
     }
 
     addBy(o: ComplexFloat): ComplexFloat {
@@ -82,10 +86,6 @@ export class ComplexFloat {
             -this.re,
             this.im
         );
-    }
-
-    isNull(): boolean {
-        return eq(this.re, 0) && eq(this.im, 0);
     }
 
     toString(): string {

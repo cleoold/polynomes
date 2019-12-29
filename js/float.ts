@@ -2,6 +2,7 @@
  * float numbers
  */
 
+import { INumberDivisibleType } from './numtype';
 
 
 export function readFloat(input: string): FloatNumber {
@@ -15,12 +16,16 @@ function eq(a: number, b: number) {
 }
 
 
-export class FloatNumber {
+export class FloatNumber implements INumberDivisibleType {
 
     float: number;
 
     constructor(float: number = 0) {
         this.float = float;
+    }
+
+    get isNull(): boolean {
+        return eq(this.float, 0);
     }
 
     addBy(o: FloatNumber): FloatNumber {
@@ -52,10 +57,6 @@ export class FloatNumber {
         return new FloatNumber(
             -this.float
         );
-    }
-
-    isNull(): boolean {
-        return eq(this.float, 0);
     }
 
     toString(): string {

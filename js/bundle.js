@@ -13,6 +13,13 @@ var BooleanNum = /** @class */ (function () {
         if (num === void 0) { num = false; }
         this.num = (num === 0 || num === false) ? false : true;
     }
+    Object.defineProperty(BooleanNum.prototype, "isNull", {
+        get: function () {
+            return this.num === false;
+        },
+        enumerable: true,
+        configurable: true
+    });
     BooleanNum.prototype.addBy = function (o) {
         return new BooleanNum(this.num || o.num);
     };
@@ -25,11 +32,8 @@ var BooleanNum = /** @class */ (function () {
     BooleanNum.prototype.negate = function () {
         return new BooleanNum(!this.num);
     };
-    BooleanNum.prototype.isNull = function () {
-        return this.num === false;
-    };
     BooleanNum.prototype.toString = function () {
-        return this.isNull() ? '(0)' : '(1)';
+        return this.isNull ? '(0)' : '(1)';
     };
     return BooleanNum;
 }());
@@ -54,6 +58,13 @@ var FloatNumber = /** @class */ (function () {
         if (float === void 0) { float = 0; }
         this.float = float;
     }
+    Object.defineProperty(FloatNumber.prototype, "isNull", {
+        get: function () {
+            return eq(this.float, 0);
+        },
+        enumerable: true,
+        configurable: true
+    });
     FloatNumber.prototype.addBy = function (o) {
         return new FloatNumber(this.float + o.float);
     };
@@ -71,9 +82,6 @@ var FloatNumber = /** @class */ (function () {
     FloatNumber.prototype.negate = function () {
         return new FloatNumber(-this.float);
     };
-    FloatNumber.prototype.isNull = function () {
-        return eq(this.float, 0);
-    };
     FloatNumber.prototype.toString = function () {
         return '(' + (Math.round(this.float * 1e3) / 1e3) + ')';
     };
@@ -83,10 +91,10 @@ exports.FloatNumber = FloatNumber;
 
 },{}],3:[function(require,module,exports){
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * float complex (a + bi)
  */
+Object.defineProperty(exports, "__esModule", { value: true });
 function readComplexFloat(input) {
     var matchedBoth = /^([\+\-]?\d+(\.\d+)?)([\+\-](\d+(\.\d+)?)(i|j))$/ig.exec(input);
     if (matchedBoth !== null)
@@ -113,6 +121,13 @@ var ComplexFloat = /** @class */ (function () {
         this.re = re;
         this.im = im;
     }
+    Object.defineProperty(ComplexFloat.prototype, "isNull", {
+        get: function () {
+            return eq(this.re, 0) && eq(this.im, 0);
+        },
+        enumerable: true,
+        configurable: true
+    });
     ComplexFloat.prototype.addBy = function (o) {
         return new ComplexFloat(this.re + o.re, this.im + o.im);
     };
@@ -133,9 +148,6 @@ var ComplexFloat = /** @class */ (function () {
     */
     ComplexFloat.prototype.negate = function () {
         return new ComplexFloat(-this.re, this.im);
-    };
-    ComplexFloat.prototype.isNull = function () {
-        return eq(this.re, 0) && eq(this.im, 0);
     };
     ComplexFloat.prototype.toString = function () {
         if (!eq(this.re, 0) && this.im > 0)
@@ -244,7 +256,7 @@ function readPolyFromChart(read, cls) {
     var mul = Px.multiplyBy(Qx);
     $PmulQ.innerHTML = mul.toString();
     try {
-        if (!('dividedBy' in Px.coef[0])) {
+        if (!Px.dividable) {
             throw EvalError('le calcul n\'est pas bien défini');
         }
         var _a = Px.dividedBy(Qx), divq = _a.q, divr = _a.r;
@@ -314,6 +326,13 @@ function IntegerModN(n) {
             if (this.num < 0)
                 this.num += this.mod;
         }
+        Object.defineProperty(A.prototype, "isNull", {
+            get: function () {
+                return this.num === 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
         A.prototype.addBy = function (o) {
             return new A((this.num + o.num) % this.mod);
         };
@@ -325,9 +344,6 @@ function IntegerModN(n) {
         };
         A.prototype.negate = function () {
             return new A(-this.num % this.mod);
-        };
-        A.prototype.isNull = function () {
-            return this.num === 0;
         };
         A.prototype.toString = function () {
             return '[' + this.num + ']' + '_' + this.mod;
@@ -352,7 +368,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 function hcf(a, b) {
-    while (!b.isNull()) {
+    while (!b.isNull) {
         var t = b;
         b = a.dividedBy(b).r;
         a = t;
@@ -367,35 +383,63 @@ var Polynomial = /** @class */ (function () {
         for (var i = 0; i < arrayLength; ++i)
             this.coef[i] = new C();
     }
+    Object.defineProperty(Polynomial.prototype, "dividable", {
+        get: function () {
+            return 'dividedBy' in new this.ctor();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Polynomial.prototype, "length", {
+        get: function () {
+            return this.coef.length;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Polynomial.prototype, "degree", {
+        get: function () {
+            for (var i = this.length - 1; i > -1; --i)
+                if (!this.coef[i].isNull)
+                    return i;
+            return -1;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Polynomial.prototype, "isNull", {
+        get: function () {
+            return this.coef.every(function (each) { return typeof each === 'undefined' || each.isNull; });
+        },
+        enumerable: true,
+        configurable: true
+    });
     Polynomial.prototype.makeCopy = function () {
         var res = new Polynomial(this.ctor);
         res.copyFrom(this);
         return res;
     };
     Polynomial.prototype.deleteTrailingZero = function () {
-        for (var i = this.length() - 1; i > -1; --i) {
-            if (!this.coef[i].isNull())
+        for (var i = this.length - 1; i > -1; --i) {
+            if (!this.coef[i].isNull)
                 break;
             this.coef.pop();
         }
     };
-    Polynomial.prototype.length = function () {
-        return this.coef.length;
-    };
     Polynomial.prototype.copyFromArray = function (arry) {
         this.coef = __spreadArrays(arry);
-        for (var i = 0; i < this.length(); ++i)
+        for (var i = 0; i < this.length; ++i)
             if (typeof this.coef[i] === 'undefined')
                 this.coef[i] = new this.ctor();
     };
     Polynomial.prototype.copyFrom = function (o) {
-        for (var i = 0; i < o.length(); ++i)
+        for (var i = 0; i < o.length; ++i)
             this.coef[i] = o.coef[i];
     };
     Polynomial.prototype.addBy = function (o) {
-        var res = new Polynomial(this.ctor, Math.max(this.length(), o.length()));
+        var res = new Polynomial(this.ctor, Math.max(this.length, o.length));
         res.copyFrom(this);
-        for (var i = 0; i < o.length(); ++i)
+        for (var i = 0; i < o.length; ++i)
             res.coef[i] = res.coef[i].addBy(o.coef[i]);
         res.deleteTrailingZero();
         return res;
@@ -409,19 +453,21 @@ var Polynomial = /** @class */ (function () {
         return res;
     };
     Polynomial.prototype.multiplyBy = function (o) {
-        var res = new Polynomial(this.ctor, this.length() + o.length() - 1);
-        for (var i = 0; i < this.length(); ++i)
-            for (var j = 0; j < o.length(); ++j)
+        var res = new Polynomial(this.ctor, this.length + o.length - 1);
+        for (var i = 0; i < this.length; ++i)
+            for (var j = 0; j < o.length; ++j)
                 res.coef[i + j] = res.coef[i + j].addBy(this.coef[i].multiplyBy(o.coef[j]));
         res.deleteTrailingZero();
         return res;
     };
     Polynomial.prototype.dividedBy = function (o) {
         var _this = this;
+        if (!this.dividable)
+            throw TypeError;
         var shiftRight = function (p, n) {
             if (n <= 0)
                 return p;
-            var deg = p.degree();
+            var deg = p.degree;
             var res = p.makeCopy();
             for (var i = deg; i > -1; --i) {
                 res.coef[i + n] = res.coef[i];
@@ -432,24 +478,24 @@ var Polynomial = /** @class */ (function () {
         var mapMult = function (p, n) {
             p.coef = p.coef.map(function (e) { return e.multiplyBy(n); });
         };
-        var ndeg = this.degree();
-        var ddeg = o.degree();
+        var ndeg = this.degree;
+        var ddeg = o.degree;
         if (ndeg < ddeg) {
             return {
                 q: new Polynomial(this.ctor, 0),
                 r: this.makeCopy()
             };
         }
-        var nden = new Polynomial(this.ctor, this.length());
+        var nden = new Polynomial(this.ctor, this.length);
         nden.copyFrom(o);
         var r = this.makeCopy();
-        var q = new Polynomial(this.ctor, this.length());
+        var q = new Polynomial(this.ctor, this.length);
         while (ndeg >= ddeg) {
             var d2 = shiftRight(nden, ndeg - ddeg);
             q.coef[ndeg - ddeg] = r.coef[ndeg].dividedBy(d2.coef[ndeg]);
             mapMult(d2, q.coef[ndeg - ddeg]);
             r = r.subtractBy(d2);
-            ndeg = r.degree();
+            ndeg = r.degree;
         }
         q.deleteTrailingZero();
         r.deleteTrailingZero();
@@ -460,23 +506,14 @@ var Polynomial = /** @class */ (function () {
     Polynomial.prototype.hcf = function (o) {
         return hcf(this, o);
     };
-    Polynomial.prototype.degree = function () {
-        for (var i = this.length() - 1; i > -1; --i)
-            if (!this.coef[i].isNull())
-                return i;
-        return -1;
-    };
-    Polynomial.prototype.isNull = function () {
-        return this.coef.every(function (each) { return typeof each === 'undefined' || each.isNull(); });
-    };
     Polynomial.prototype.toStringArr = function () {
         return this.coef.map(function (each, i) { return [each.toString(), i]; }).reverse();
     };
     Polynomial.prototype.toString = function () {
-        if (this.isNull())
+        if (this.isNull)
             return '0';
         return this.coef.map(function (each, i) { return [each, i]; })
-            .filter(function (t) { return !t[0].isNull(); })
+            .filter(function (t) { return !t[0].isNull; })
             .reverse()
             .map(function (p) { return p[0].toString() + 'x^' + p[1]; })
             .join(' + ')
@@ -531,6 +568,13 @@ var Rational = /** @class */ (function () {
         this.numerator /= myhcf;
         this.denominator /= myhcf;
     };
+    Object.defineProperty(Rational.prototype, "isNull", {
+        get: function () {
+            return this.numerator === 0;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Rational.prototype.addBy = function (o) {
         return new Rational(this.numerator * o.denominator + this.denominator * o.numerator, this.denominator * o.denominator);
     };
@@ -545,9 +589,6 @@ var Rational = /** @class */ (function () {
     };
     Rational.prototype.negate = function () {
         return new Rational(-this.numerator, this.denominator);
-    };
-    Rational.prototype.isNull = function () {
-        return this.numerator === 0;
     };
     Rational.prototype.toString = function () {
         if (this.numerator === 0)

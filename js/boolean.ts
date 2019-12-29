@@ -2,18 +2,24 @@
  * boolean (in-or, and)
  */
 
+import { INumberType } from './numtype';
+
 
 export function readBooleanNum(input: string): BooleanNum {
     return new BooleanNum(parseInt(input));
 }
 
 
-export class BooleanNum {
+export class BooleanNum implements INumberType {
 
     num: boolean;
 
     constructor(num: boolean | number = false) {
         this.num = (num === 0 || num === false) ? false : true;
+    }
+
+    get isNull(): boolean {
+        return this.num === false;
     }
 
     addBy(o: BooleanNum): BooleanNum {
@@ -32,11 +38,7 @@ export class BooleanNum {
         return new BooleanNum(!this.num);
     }
 
-    isNull(): boolean {
-        return this.num === false;
-    }
-
     toString(): string {
-        return this.isNull() ? '(0)' : '(1)';
+        return this.isNull ? '(0)' : '(1)';
     }
 }

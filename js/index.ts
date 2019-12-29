@@ -94,7 +94,7 @@ function readPolyFromChart<NumType>(read: (_:string) => NumType, cls: new () => 
     const mul = Px.multiplyBy(Qx);
     $PmulQ.innerHTML = mul.toString();
     try {
-        if (!('dividedBy' in Px.coef[0])) {
+        if (!Px.dividable) {
             throw EvalError('le calcul n\'est pas bien défini');
         }
         const {q: divq, r: divr} = Px.dividedBy(Qx);
