@@ -2,19 +2,27 @@
   "name": "polynomes",
   "description": "essayez des additions polynomiales",
   "scripts": {
-    "start": "tsc && concurrently \"npm run tsc:w\"",
+    "start": "npm run build && concurrently \"npm run tsc:w\" \"npm run bundle:w\" \"npm run less:w\" \"lite-server\"",
     "lite": "lite-server",
     "tsc": "tsc",
-    "tsc:w": "tsc -w"
+    "tsc:w": "tsc -w",
+    "less": "lessc css/style.less css/style.css",
+    "less:w": "less-watch-compiler css/ css/",
+    "bundle": "browserify js/index.js -o js/bundle.js",
+    "bundle:w": "watchify js/index.js -o js/bundle.js",
+    "build": "npm run tsc && npm run less && npm run bundle"
   },
   "dependencies": {},
   "devDependencies": {
     "@types/node": "^12.12.5",
+    "browserify": "^16.5.0",
     "concurrently": "^2.0.0",
-    "lite-server": "^2.5.4"
+    "less-watch-compiler": "^1.14.6",
+    "lite-server": "^2.5.4",
+    "watchify": "^3.11.1"
   },
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "js/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cleoold/polynomes.git"
@@ -23,7 +31,7 @@
     "polynomials"
   ],
   "author": "cleoold",
-  "license": "ISC",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/cleoold/polynomes/issues"
   },

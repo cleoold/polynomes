@@ -49,10 +49,19 @@ PQ: [12]_24x^2 + [23]_24x + [20]24
 ```
 
 #### fonctionner
-cette page Web fonctionne sur Typescript et Less.js. Après avoir touché des fichiers, faire
+Cette page Web fonctionne sur Typescript et Less.js. Installer globalement
+
 ```bash
-> cd js/ && browserify index.js -o bundle.js
-> cd css/ && lessc style.less style.css
+npm install -g typescript
+npm install -g less
 ```
+
+Après avoir touché des fichiers, recompiler toutes les modifications
+
+```bash
+npm install
+npm run build
+```
+Cela génère JS, CSS fichier groupé
 
 
