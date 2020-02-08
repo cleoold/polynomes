@@ -52,14 +52,12 @@ PQ: [12]_24x^2 + [23]_24x + [20]24
 Cette page Web fonctionne sur Typescript et Less.js. Installer globalement
 
 ```bash
-npm install -g typescript
-npm install -g less
+npm install
 ```
 
 Après avoir touché des fichiers, recompiler toutes les modifications
 
 ```bash
-npm install
 npm run build
 ```
 Cela génère JS, CSS fichier groupé

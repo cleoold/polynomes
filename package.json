@@ -12,7 +12,10 @@
     "bundle:w": "watchify js/index.js -o js/bundle.js",
     "build": "npm run tsc && npm run less && npm run bundle"
   },
-  "dependencies": {},
+  "dependencies": {
+    "less": "^3.10.3",
+    "typescript": "^3.7.5"
+  },
   "devDependencies": {
     "@types/node": "^12.12.5",
     "browserify": "^16.5.0",
