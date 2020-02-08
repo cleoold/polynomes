@@ -1,3 +1,5 @@
+![Node.js Build](https://github.com/cleoold/polynomes/workflows/Node.js%20Build/badge.svg)
+
 # polynomes
 
 Outil de calcul polynomial - juste pour le plaisir!
