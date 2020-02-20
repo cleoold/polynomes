@@ -27,7 +27,7 @@ function hcf(a: integer, b: integer): integer {
 }
 
 
-export class Rational implements INumberDivisibleType {
+export class Rational implements INumberDivisibleType<Rational> {
 
     numerator: integer;
     denominator: integer;

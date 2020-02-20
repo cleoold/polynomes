@@ -9,24 +9,25 @@ import { ComplexFloat, readComplexFloat } from './floatcomplex';
 import { IntegerModN, readIntegerModN } from './integer';
 import { BooleanNum, readBooleanNum } from './boolean';
 import { Polynomial } from './polynomials';
+import { INumberType } from './numtype';
 
 
 const $ = document.querySelector.bind(document);
 
-const $inputP = $('#poly-1');
-const $inputQ = $('#poly-2');
-const $P = $('#display-poly1 span');
-const $Q = $('#display-poly2 span');
-const $PaddQ = $('#display-polyadd span');
-const $PsubQ = $('#display-polysub span');
-const $PmulQ = $('#display-polymult span');
-const $PdivQ = $('#display-polydivq span');
-const $PmodQ = $('#display-polydivr span');
-const $hcf = $('#display-polygcd span');
-const $$ins = [$inputP, $inputQ];
-const $$outs = [$P, $Q, $PaddQ, $PsubQ, $PmulQ, $PdivQ, $PmodQ, $hcf];
+const $inputP = $('#poly-1')                as NonNullable<HTMLInputElement>;
+const $inputQ = $('#poly-2')                as NonNullable<HTMLInputElement>;
+const $P      = $('#display-poly1 span')    as NonNullable<HTMLElement>;
+const $Q      = $('#display-poly2 span')    as NonNullable<HTMLElement>;
+const $PaddQ  = $('#display-polyadd span')  as NonNullable<HTMLElement>;
+const $PsubQ  = $('#display-polysub span')  as NonNullable<HTMLElement>;
+const $PmulQ  = $('#display-polymult span') as NonNullable<HTMLElement>;
+const $PdivQ  = $('#display-polydivq span') as NonNullable<HTMLElement>;
+const $PmodQ  = $('#display-polydivr span') as NonNullable<HTMLElement>;
+const $hcf    = $('#display-polygcd span')  as NonNullable<HTMLElement>;
+const $$ins   = [$inputP, $inputQ];
+const $$outs  = [$P, $Q, $PaddQ, $PsubQ, $PmulQ, $PdivQ, $PmodQ, $hcf];
 
-const $mode = $('#set-field');
+const $mode   = $('#set-field')             as NonNullable<HTMLInputElement>;
 
 
 function checkSlow(strVal: string): boolean {
@@ -45,16 +46,16 @@ function slowMsgToggle(strVal: string): boolean {
         $slow.innerHTML = 'Ce calcul peut être lent...';
         $slow.style.color = 'red';
         $slow.className = 'might-be-slow-msg';
-        $('.data-head').appendChild($slow);
+        ($('.data-head') as HTMLElement).appendChild($slow);
         return true;
     }
     if ($slowMsg === null) return false;
-    $slowMsg.parentNode.removeChild($slowMsg);
+    ($slowMsg.parentNode as HTMLLIElement).removeChild($slowMsg);
     return false;
 }
 
 
-function readPoly<NumType>(read: (_:string) => NumType, C: new () => NumType, strVal: string): Polynomial<NumType> {
+function readPoly<T extends INumberType<T>>(read: (_:string) => T, C: new () => T, strVal: string): Polynomial<T> {
     const strings = strVal.split(' ');
     let arr = [];
     for (let i = 0; i < strings.length; i += 2)
@@ -65,22 +66,26 @@ function readPoly<NumType>(read: (_:string) => NumType, C: new () => NumType, st
 }
 
 
-function readPolyFromChart<NumType>(read: (_:string) => NumType, cls: new () => NumType): void {
-    $$outs.forEach(elem => elem.innerHTML = '');
+function readPolyFromChart<T extends INumberType<T>>(read: (_:string) => T, cls: new () => T): void {
+    $$outs.forEach(elem => elem && (elem.innerHTML = ''));
 
-    let Px: Polynomial<any>, Qx: Polynomial<any>;
-    try {
-        Px = readPoly(read, cls, $inputP.value);
-    } catch (err) {
-        if (err instanceof EvalError) $P.innerHTML = err.message;
-        else throw err;
-    }
-    try {
-        Qx = readPoly(read, cls, $inputQ.value);
-    } catch (err) {
-        if (err instanceof EvalError) $Q.innerHTML = err.message;
-        else throw err;
-    }
+    const Px = (() => {
+        try {
+            return readPoly(read, cls, $inputP.value)
+        } catch (err) {
+            if (err instanceof EvalError) $P.innerHTML = err.message;
+            else throw err;
+        }
+    })() as Polynomial<T>;
+    const Qx = (() => {
+        try {
+            return readPoly(read, cls, $inputQ.value)
+        } catch (err) {
+            if (err instanceof EvalError) $Q.innerHTML = err.message;
+            else throw err;
+        }
+    })() as Polynomial<T>;
+
     $P.innerHTML = Px.toString();
     $Q.innerHTML = Qx.toString();
     slowMsgToggle($inputP.value) || slowMsgToggle($inputQ.value);
@@ -131,7 +136,7 @@ $mode.addEventListener('change', () => {
         $inputP.oninput = readPolyFromChart.bind(null, readComplexFloat, ComplexFloat);
         break;
     case 'integermodn':
-        let n = parseInt(prompt('Veuillez entrer N (classe de congruence de modulo)'));
+        let n = parseInt(<string>prompt('Veuillez entrer N (classe de congruence de modulo)'));
         if (!(n > 0)) n = 7;
         $inputP.oninput = readPolyFromChart.bind(null, readIntegerModN(n), IntegerModN(n));
         break;

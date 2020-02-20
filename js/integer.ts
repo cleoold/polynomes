@@ -5,15 +5,15 @@
 
 import { INumberType, integer } from './numtype';
 
-export function readIntegerModN(n: integer): (input:string) => INumberType {
+export function readIntegerModN(n: integer) {
     const ctor = IntegerModN(n);
-    return input => new ctor(parseInt(input));
+    return (input: string) => new ctor(parseInt(input));
 }
 
 
-export function IntegerModN(n: integer): new (...a) => INumberType {
+export function IntegerModN(n: integer) {
 
-class A implements INumberType {
+class A implements INumberType<A> {
     num: integer;
     mod: integer = n;
 

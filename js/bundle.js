@@ -224,26 +224,29 @@ function readPoly(read, C, strVal) {
     return res;
 }
 function readPolyFromChart(read, cls) {
-    $$outs.forEach(function (elem) { return elem.innerHTML = ''; });
-    var Px, Qx;
-    try {
-        Px = readPoly(read, cls, $inputP.value);
-    }
-    catch (err) {
-        if (err instanceof EvalError)
-            $P.innerHTML = err.message;
-        else
-            throw err;
-    }
-    try {
-        Qx = readPoly(read, cls, $inputQ.value);
-    }
-    catch (err) {
-        if (err instanceof EvalError)
-            $Q.innerHTML = err.message;
-        else
-            throw err;
-    }
+    $$outs.forEach(function (elem) { return elem && (elem.innerHTML = ''); });
+    var Px = (function () {
+        try {
+            return readPoly(read, cls, $inputP.value);
+        }
+        catch (err) {
+            if (err instanceof EvalError)
+                $P.innerHTML = err.message;
+            else
+                throw err;
+        }
+    })();
+    var Qx = (function () {
+        try {
+            return readPoly(read, cls, $inputQ.value);
+        }
+        catch (err) {
+            if (err instanceof EvalError)
+                $Q.innerHTML = err.message;
+            else
+                throw err;
+        }
+    })();
     $P.innerHTML = Px.toString();
     $Q.innerHTML = Qx.toString();
     slowMsgToggle($inputP.value) || slowMsgToggle($inputQ.value);

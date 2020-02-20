@@ -36,7 +36,7 @@ function eq(a: number, b: number) {
     return Math.abs(a - b) < 1e-5;
 }
 
-export class ComplexFloat implements INumberType {
+export class ComplexFloat implements INumberType<ComplexFloat> {
 
     re: number;
     im: number;

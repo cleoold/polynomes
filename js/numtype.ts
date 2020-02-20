@@ -1,17 +1,17 @@
 
 export type integer = number;
 
-export interface INumberType {
+export interface INumberType<Self> {
     isNull: boolean;
-    addBy(o: INumberType): INumberType;
-    subtractBy(o: INumberType): INumberType;
-    multiplyBy(o: INumberType): INumberType;
-    negate(): INumberType;
+    addBy(o: Self): Self;
+    subtractBy(o: Self): Self;
+    multiplyBy(o: Self): Self;
+    negate(): Self;
     toString(): string;
 }
 
-export interface INumberDivisibleType extends INumberType {
-    dividedBy(O: INumberType): INumberType;
+export interface INumberDivisibleType<Self> extends INumberType<Self> {
+    dividedBy(o: Self): Self;
 }
 
 

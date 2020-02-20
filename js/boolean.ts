@@ -10,7 +10,7 @@ export function readBooleanNum(input: string): BooleanNum {
 }
 
 
-export class BooleanNum implements INumberType {
+export class BooleanNum implements INumberType<BooleanNum> {
 
     num: boolean;
 

@@ -16,7 +16,7 @@ function eq(a: number, b: number) {
 }
 
 
-export class FloatNumber implements INumberDivisibleType {
+export class FloatNumber implements INumberDivisibleType<FloatNumber> {
 
     float: number;
 
